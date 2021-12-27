@@ -1,8 +1,11 @@
-// give the user a nice default project!
-ThisBuild / organization := "com.example"
-ThisBuild / scalaVersion := "2.13.6"
+import Dependencies._
+
+ThisBuild / organization := "$organization$"
+ThisBuild / scalaVersion := "$scala_version$"
+ThisBuild / version      := "1.0"
 
 lazy val root = (project in file(".")).
   settings(
-    name := "http4s-server"
+    name := "$name$",
+    libraryDependencies ++= coreLibraries
   )
