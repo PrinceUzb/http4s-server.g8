@@ -3,19 +3,21 @@ import sbt._
 
 object Dependencies {
   object Versions {
-    val cats       = "$cats_version$"
-    val catsEffect = "$cats_effect_version$"
-    val circe      = "$circe_version$"
-    val fs2        = "$fs2_version$"
-    val http4s     = "$http4s_version$"
-    val log4cats   = "$log4cats_version$"
-    val skunk      = "$skunk_version$"
-    val logback    = "$logback_version$"
-    val ciris      = "$ciris_version$"
-    val scalaCheck = "$scala_check_version$"
-    val scalaTest  = "$scala_test_version$"
-    val refined    = "$refined_version$"
-    val tsec       = "$tsec_version$"
+    val cats        = "$cats_version$"
+    val catsEffect  = "$cats_effect_version$"
+    val circe       = "$circe_version$"
+    val fs2         = "$fs2_version$"
+    val http4s      = "$http4s_version$"
+    val log4cats    = "$log4cats_version$"
+    val skunk       = "$skunk_version$"
+    val logback     = "$logback_version$"
+    val ciris       = "$ciris_version$"
+    val scalaCheck  = "$scala_check_version$"
+    val scalaTest   = "$scala_test_version$"
+    val refined     = "$refined_version$"
+    val tsec        = "$tsec_version$"
+    val bootstrap   = "$bootstrap_version$"
+    val fontAwesome = "$font_awesome_version$"
   }
 
   object Libraries {
@@ -61,6 +63,10 @@ object Dependencies {
     val scalaCheck = "org.scalacheck" %% "scalacheck" % Versions.scalaCheck
     val scalaTest  = "org.scalatest"  %% "scalatest"  % Versions.scalaTest
 
+    val webjars: Seq[ModuleID] = Seq(
+      "org.webjars" % "bootstrap"    % Versions.bootstrap,
+      "org.webjars" % "font-awesome" % Versions.fontAwesome
+    )
   }
 
   val circeLibs = Seq(circeCore, circeGeneric, circeParser, circeRefined)
@@ -73,7 +79,7 @@ object Dependencies {
 
   val logLibs = Seq(log4cats, logback)
 
-  val coreLibraries: Seq[ModuleID] = catsLibs ++ cirisLibs ++ circeLibs ++ http4sLibs ++ logLibs ++ Seq(
+  val coreLibraries: Seq[ModuleID] = catsLibs ++ cirisLibs ++ circeLibs ++ http4sLibs ++ logLibs ++ webjars ++ Seq(
     skunkCore,
     skunkCirce,
     skunkRefined,

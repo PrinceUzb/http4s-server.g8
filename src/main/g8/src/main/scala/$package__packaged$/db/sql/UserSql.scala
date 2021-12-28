@@ -25,12 +25,12 @@ object UserSql {
   }
 
   val insert: Command[User ~ PasswordHash[SCrypt]] =
-    sql"""INSERT INTO users VALUES ($enc)""".command
+    sql"""INSERT INTO users VALUES (\$enc)""".command
 
   val selectByEmail: Query[String, User] =
-    sql"""SELECT * FROM users WHERE email = $varchar """.query(dec)
+    sql"""SELECT * FROM users WHERE email = \$varchar """.query(dec)
 
   val selectPass: Query[String, String] =
-    sql"""SELECT password_hash FROM users WHERE email = $varchar """.query(varchar)
+    sql"""SELECT password_hash FROM users WHERE email = \$varchar """.query(varchar)
 
 }

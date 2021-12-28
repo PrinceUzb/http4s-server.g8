@@ -2,14 +2,13 @@ package $package$.modules
 
 import cats.effect._
 import cats.implicits._
-import $package$.RootRoutes
 import $package$.config.LogConfig
 import $package$.domain.User
 import $package$.routes._
 import $package$.security.AuthService
 import org.http4s._
 import org.http4s.implicits._
-import org.http4s.server.staticcontent.WebjarServiceBuilder
+import org.http4s.server.staticcontent.webjarServiceBuilder
 import org.http4s.server.{Router, middleware}
 import org.typelevel.log4cats.Logger
 
@@ -32,10 +31,9 @@ final class HttpApi[F[_]: Async: Logger] private (
 
   private[this] val rootRoutes: HttpRoutes[F] = RootRoutes[F]
   private[this] val userRoutes: HttpRoutes[F] = UserRoutes[F].routes
-  private[this] val webjars: HttpRoutes[F]    = WebjarServiceBuilder.apply[F].toRoutes
+  private[this] val webjars: HttpRoutes[F]    = webjarServiceBuilder[F].toRoutes
 
-  private[this] val routes: HttpRoutes[F] =
-  rootRoutes <+> userRoutes
+  private[this] val routes: HttpRoutes[F] = rootRoutes <+> userRoutes
 
   private[this] val loggedRoutes: HttpRoutes[F] => HttpRoutes[F] = http =>
     middleware.Logger.httpRoutes(logConfig.httpHeader, logConfig.httpBody)(http)

@@ -37,7 +37,7 @@ final class UserRoutes[F[_]: Async](implicit logger: Logger[F], authService: Aut
     case req @ POST -> Root / "register" =>
       (for {
         userData <- req.as[UserData]
-        _        <- logger.debug(s"$userData")
+        _        <- logger.debug(s"\$userData")
       } yield Response[F](NoContent))
         .handleErrorWith { err =>
           logger.error(err)("Error occurred while register User. ") >>

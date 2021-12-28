@@ -1,4 +1,4 @@
-package $package$
+package $package$.routes
 
 import cats.effect.Async
 import org.http4s.HttpRoutes
