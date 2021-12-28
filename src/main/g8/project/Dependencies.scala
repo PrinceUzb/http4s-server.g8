@@ -1,4 +1,5 @@
 import Dependencies.Libraries._
+import sbt._
 
 object Dependencies {
   object Versions {
