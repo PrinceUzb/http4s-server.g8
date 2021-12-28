@@ -4,7 +4,7 @@
 lazy val root = (project in file("."))
   .enablePlugins(ScriptedPlugin)
   .settings(
-    name := "http4s-server.g8",
+    name := "http4s-server",
     Test / test := {
       val _ = (Test / g8Test).toTask("").value
     },
