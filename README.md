@@ -9,12 +9,12 @@ Generate a http4s server on the blaze backend with Circe.
 
 --------------
  ```bash 
-g8 Prince951-17/http4s-server.g8
+g8 PrinceUzb/http4s-server.g8
 ```
 
 or to use directly from sbt you can use:
  ```sbt 
-sbt new Prince951-17/http4s-server.g8
+sbt new PrinceUzb/http4s-server.g8
 ```
 ## Instructions
 
