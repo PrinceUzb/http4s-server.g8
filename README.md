@@ -1,7 +1,7 @@
 # http4s-serve giter8 template
 
 -------------
-[![Build Status](https://app.travis-ci.com/Prince951-17/http4s-server.g8.svg?branch=master)](https://app.travis-ci.com/Prince951-17/http4s-server.g8)
+[![Build Status](https://app.travis-ci.com/PrinceUzb/http4s-server.g8.svg?branch=master)](https://app.travis-ci.com/PrinceUzb/http4s-server.g8)
 
 Generate a http4s server on the blaze backend with Circe.
 
