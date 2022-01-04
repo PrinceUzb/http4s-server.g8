@@ -3,24 +3,25 @@ import sbt._
 
 object Dependencies {
   object Versions {
-    val cats         = "$cats_version$"
-    val catsEffect   = "$cats_effect_version$"
-    val circe        = "$circe_version$"
-    val fs2          = "$fs2_version$"
-    val http4s       = "$http4s_version$"
-    val log4cats     = "$log4cats_version$"
-    val skunk        = "$skunk_version$"
-    val logback      = "$logback_version$"
-    val ciris        = "$ciris_version$"
-    val scalaCheck   = "$scala_check_version$"
-    val scalaTest    = "$scala_test_version$"
-    val refined      = "$refined_version$"
-    val tsec         = "$tsec_version$"
-    val bootstrap    = "$bootstrap_version$"
-    val fontAwesome  = "$font_awesome_version$"
-    val scalaJsReact = "$scalajs_react_version$"
-    val scalaCss     = "$scala_css_version$"
-    val reactJs      = "17.0.2"
+    val cats          = "$cats_version$"
+    val catsEffect    = "$cats_effect_version$"
+    val circe         = "$circe_version$"
+    val fs2           = "$fs2_version$"
+    val http4s        = "$http4s_version$"
+    val log4cats      = "$log4cats_version$"
+    val skunk         = "$skunk_version$"
+    val logback       = "$logback_version$"
+    val ciris         = "$ciris_version$"
+    val scalaCheck    = "$scala_check_version$"
+    val scalaTest     = "$scala_test_version$"
+    val scalaTestPlus = "$scala_test_plus_version$"
+    val refined       = "$refined_version$"
+    val tsec          = "$tsec_version$"
+    val bootstrap     = "$bootstrap_version$"
+    val fontAwesome   = "$font_awesome_version$"
+    val scalaJsReact  = "$scalajs_react_version$"
+    val scalaCss      = "$scala_css_version$"
+    val reactJs       = "17.0.2"
   }
 
   object Libraries {
@@ -65,6 +66,8 @@ object Dependencies {
     // Test
     val scalaCheck = "org.scalacheck" %% "scalacheck" % Versions.scalaCheck
     val scalaTest  = "org.scalatest"  %% "scalatest"  % Versions.scalaTest
+    val scalaTestPlus = "org.scalatestplus" %% "scalacheck-1-15" % Versions.scalaTestPlus
+
 
     val webjars: Seq[ModuleID] = Seq(
       "org.webjars" % "bootstrap"    % Versions.bootstrap,
@@ -93,6 +96,7 @@ object Dependencies {
 
   val testLibraries = Seq(
     scalaCheck,
-    scalaTest
+    scalaTest,
+    scalaTestPlus
   )
 }
