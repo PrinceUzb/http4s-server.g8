@@ -1,13 +1,10 @@
-package test.crowdlabel.utils
+package $package$.test.utils
 
-import cats.data.NonEmptyList
-import cats.implicits.*
-import crowdlabel.domain.*
-import crowdlabel.domain.AnswerType.*
-import crowdlabel.domain.Project.{TaskType, ProjectStatus}
-import crowdlabel.domain.custom.refinements.*
+import cats.implicits._
+import $package$.domain._
+import $package$.domain.custom.refinements._
 import eu.timepit.refined.auto.autoUnwrap
-import eu.timepit.refined.types.numeric.*
+import eu.timepit.refined.types.numeric._
 import eu.timepit.refined.types.string.NonEmptyString
 
 import java.time.LocalDateTime
@@ -15,23 +12,23 @@ import java.util.UUID
 import scala.util.Random
 
 object FakeData:
+  def randomString(length: Int): String = Random.alphanumeric.take(length).mkString
+
+  def randomEmail: EmailAddress = EmailAddress.unsafeFrom(s"${randomString(8)}@gmail.com")
+
   val Pass: Password = Password.unsafeFrom("Secret1!")
 
-  def user(emailAddress: EmailAddress, rateId: UUID): User =
+  def user(email: EmailAddress = randomEmail): User =
     User(
       id = UUID.randomUUID(),
       fullName = FullName.unsafeFrom("John Dao"),
-      passwordExpiresAt = LocalDateTime.now,
-      createdAt = LocalDateTime.now,
-      updatedAt = LocalDateTime.now.some,
-      email = EmailAddress.unsafeFrom(emailAddress),
-      rateId = rateId
+      email = EmailAddress.unsafeFrom(email),
+      createdAt = LocalDateTime.now
     )
 
-  def userForm(invite: String = "aaa"): UserForm =
+  def userData: UserData =
     UserForm(
       fullName = FullName.unsafeFrom("John Dao"),
-      email = EmailAddress.unsafeFrom(randomEmail(4)),
-      inviteCode = NonEmptyString.unsafeFrom(invite),
+      email = randomEmail,
       password = Password.unsafeFrom("Secret1!")
     )

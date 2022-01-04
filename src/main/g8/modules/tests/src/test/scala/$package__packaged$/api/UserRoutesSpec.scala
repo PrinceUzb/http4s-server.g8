@@ -2,14 +2,14 @@ package $package$.api
 
 import cats.data.NonEmptyList
 import cats.effect.IO
-import cats.implicits.*
+import cats.implicits._
 import $package$.domain.{EmailAndPassword, UserData}
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Encoder
-import org.http4s.*
-import test.crowdlabel.api.UserRoutesChecker
-import test.crowdlabel.utils.{FakeData, TestEnv}
-import test.crowdlabel.utils.logger.NoOp
+import org.http4s._
+import $package$.test.api.UserRoutesChecker
+import $package$.test.utils.{FakeData, TestEnv}
+import $package$.test.utils.logger.NoOp
 
 class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
 
@@ -39,11 +39,10 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
     runAssertions(
       theTest(false, Method.POST),
       theTest(false, Method.GET),
-      theTest(false, Method.POST, FakeData.userForm("expired").some),
-      theTest(false, Method.POST, FakeData.userForm().some),
+      theTest(false, Method.POST, FakeData.userData.some),
       theTest(true, Method.POST),
       theTest(true, Method.GET),
-      theTest(true, Method.POST, FakeData.userForm().some),
+      theTest(true, Method.POST, FakeData.userData.some),
     )
   }
 
@@ -71,7 +70,7 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
         }
     }
 
-    val body = EmailAndPassword(EmailAddress.unsafeFrom(FakeData.randomEmail(4)), Password.unsafeFrom("Secret1!")).some
+    val body = EmailAndPassword(FakeData.randomEmail, FakeData.Pass).some
 
     runAssertions(
       theTest(false, Method.POST),
@@ -87,12 +86,9 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
     def theTest(isAuthed: Boolean, method: Method) = {
       val shouldReturn =
         if (isAuthed)
-          if (method == Method.GET)
-            Status.Ok
-          else
-            Status.NotFound
-        else
-          Status.Unauthorized
+          if (method == Method.GET) Status.Ok
+          else Status.NotFound
+        else Status.Unauthorized
 
       val params =
         s"""

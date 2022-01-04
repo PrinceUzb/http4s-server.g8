@@ -6,10 +6,10 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.string.{MatchesRegex, Url}
 
 package object refinements {
-  private type EmailPred        = MatchesRegex["^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\\\.[a-zA-Z]+\$"]
-  private type LoginPred        = MatchesRegex["^[a-zA-Z0-9]{3,32}\$"]
-  private type PasswordPred     = MatchesRegex["^(?=.*[0-9])(?=.*[!@#\$%^&*])(?=.*[A-Z])[a-zA-Z0-9!@#\$%^&*]{6,32}\$"]
-  private type FullNamePred     = MatchesRegex["^[a-zA-Z]{3,}(?:\\\s[a-zA-Z]+)+\$"]
+  private type EmailPred = MatchesRegex["^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\\\.[a-zA-Z]+\$"]
+  private type LoginPred = MatchesRegex["^[a-zA-Z0-9]{3,32}\$"]
+  private type PasswordPred = MatchesRegex["^(?=.*[0-9])(?=.*[!@#\$%^&*])(?=.*[A-Z])[a-zA-Z0-9!@#\$%^&*]{6,32}\$"]
+  private type FullNamePred = MatchesRegex["^[a-zA-Z]{3,}(?:\\\s[a-zA-Z]+)+\$"]
 
   type FullName = String Refined FullNamePred
   object FullName extends RefinedTypeOps[FullName, String]

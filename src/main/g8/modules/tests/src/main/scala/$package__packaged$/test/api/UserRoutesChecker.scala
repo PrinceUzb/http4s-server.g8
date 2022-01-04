@@ -25,7 +25,7 @@ trait UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F]) {
     override def get(id: EmailAddress): OptionT[F, User] =
       OptionT(SCrypt.hashpw[F]("Secret1!").map { hash =>
         if (isCorrect)
-          FakeData.user(EmailAddress.unsafeFrom(FakeData.randomEmail(4)), UUID.randomUUID()).some
+          FakeData.user().some
         else None
       })
 
@@ -37,13 +37,11 @@ trait UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F]) {
   }
 
   class FakeUserService(isCorrect: Boolean) extends UserService[F] {
-    override def create(user: UserForm): F[Unit] =
+    override def create(user: UserData): F[Unit] =
       if (isCorrect)
         F.unit
-      else if (user.inviteCode.toString.contains("expired"))
-        F.raiseError(InviteError.AlreadyUsed(user.inviteCode))
       else
-        F.raiseError(InviteError.NotFound)
+        F.raiseError(new Exception("Error"))
   }
 
   private def reqUserRoutes(
@@ -66,7 +64,7 @@ trait UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F]) {
     for {
       authService <- LiveAuthService[F, User](new FakeIdentityService(isCorrect))
 
-      credentials = EmailAndPassword(EmailAddress.unsafeFrom(FakeData.randomEmail(4)), Password.unsafeFrom("Secret1!"))
+      credentials = EmailAndPassword(FakeData.randomEmail, FakeData.Pass)
       loginReq = Request[F](Method.POST, uri"/user/login").withEntity(credentials)
       authRes <- reqUserRoutes(loginReq)(authService)
     } yield (authService, authRes)

@@ -2,7 +2,7 @@ package $package$.test
 
 import cats.Eq
 import $package$.test.utils.{CatsEquivalence, LowPriorityCatsConstraints}
-import org.scalactic.*
+import org.scalactic._
 import org.scalactic.TripleEqualsSupport.{AToBEquivalenceConstraint, BToAEquivalenceConstraint}
 
 import scala.language.implicitConversions
