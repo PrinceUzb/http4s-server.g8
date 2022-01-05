@@ -4,10 +4,12 @@ import cats.data._
 import cats.effect._
 import cats.implicits._
 import $package$.domain._
-import $package$.domain.custom.refinements.{EmailAddress, Login, Password, UrlAddress}
+import $package$.routes.UserRoutes
+import $package$.implicits.OptionIdOps
+import $package$.domain.custom.refinements.EmailAddress
 import $package$.routes._
 import $package$.security.{AuthService, LiveAuthService}
-import $package$.services.{AnswerService, IdentityService, UserService}
+import $package$.services.{IdentityService, UserService}
 import org.http4s._
 import org.http4s.implicits._
 import org.typelevel.log4cats.Logger
@@ -23,17 +25,17 @@ trait UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F]) {
   class FakeIdentityService(isCorrect: Boolean) extends IdentityService[F, User] {
 
     override def get(id: EmailAddress): OptionT[F, User] =
-      OptionT(SCrypt.hashpw[F]("Secret1!").map { hash =>
-        if (isCorrect)
-          FakeData.user().some
-        else None
-      })
+      OptionT(F.delay(FakeData.user().toOptWhen(isCorrect)))
 
     override def credentialStore: SCryptPasswordStore[F, EmailAddress] =
-      new SCryptPasswordStore[F, EmailAddress]:
+      new SCryptPasswordStore[F, EmailAddress] {
+        override def retrievePass(id: EmailAddress): OptionT[F, PasswordHash[SCrypt]] =
+          OptionT(SCrypt.hashpw[F]("Secret1!").map(_.toOptWhen(isCorrect)))
+      }
+
 
     override def retrievePass(id: EmailAddress): OptionT[F, PasswordHash[SCrypt]] =
-      OptionT(SCrypt.hashpw[F]("Secret1!").map(hash => if (isCorrect) Some(hash) else None))
+      OptionT(SCrypt.hashpw[F]("Secret1!").map(_.toOptWhen(isCorrect)))
   }
 
   class FakeUserService(isCorrect: Boolean) extends UserService[F] {

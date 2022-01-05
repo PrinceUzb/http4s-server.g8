@@ -1,20 +1,17 @@
 package $package$.test.utils
 
-import cats.implicits._
 import $package$.domain._
 import $package$.domain.custom.refinements._
 import eu.timepit.refined.auto.autoUnwrap
-import eu.timepit.refined.types.numeric._
-import eu.timepit.refined.types.string.NonEmptyString
 
 import java.time.LocalDateTime
 import java.util.UUID
 import scala.util.Random
 
-object FakeData:
+object FakeData {
   def randomString(length: Int): String = Random.alphanumeric.take(length).mkString
 
-  def randomEmail: EmailAddress = EmailAddress.unsafeFrom(s"${randomString(8)}@gmail.com")
+  def randomEmail: EmailAddress = EmailAddress.unsafeFrom(s"\${randomString(8)}@gmail.com")
 
   val Pass: Password = Password.unsafeFrom("Secret1!")
 
@@ -32,3 +29,4 @@ object FakeData:
       email = randomEmail,
       password = Password.unsafeFrom("Secret1!")
     )
+}

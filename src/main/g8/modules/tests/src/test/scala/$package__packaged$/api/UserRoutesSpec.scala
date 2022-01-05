@@ -24,15 +24,15 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
       val params =
         s"""
         Params:
-          Method: $method
-          IsCorrectCredentials: $isCorrect
-          Body: $body
-          Should Return: $shouldReturn
+          Method: \$method
+          IsCorrectCredentials: \$isCorrect
+          Body: \$body
+          Should Return: \$shouldReturn
       """
       reqToUserRegister(method, body, isCorrect)
         .map(res => assert(res.status == shouldReturn, params))
         .handleError { error =>
-          fail(s"Test failed. Error: $error")
+          fail(s"Test failed. Error: \$error")
         }
     }
 
@@ -58,15 +58,15 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
       val params =
         s"""
         Params:
-          Method: $method
-          IsCorrectCredentials: $isCorrect
-          Body: $body
-          Should Return: $shouldReturn
+          Method: \$method
+          IsCorrectCredentials: \$isCorrect
+          Body: \$body
+          Should Return: \$shouldReturn
       """
       reqToAuth(method, body, isCorrect)
         .map(res => assert(res.status == shouldReturn, params))
         .handleError { error =>
-          fail(s"Test failed. Error: $error")
+          fail(s"Test failed. Error: \$error")
         }
     }
 
@@ -93,14 +93,14 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
       val params =
         s"""
           Params:
-            Method: $method
-            IsAuthorized: $isAuthed
-            Should Return: $shouldReturn
+            Method: \$method
+            IsAuthorized: \$isAuthed
+            Should Return: \$shouldReturn
         """
       reqToGetUser(method, isAuthed)
         .map(res => assert(res.status == shouldReturn, params))
         .handleError { error =>
-          fail(s"Test failed. Error: $error")
+          fail(s"Test failed. Error: \$error")
         }
     }
 

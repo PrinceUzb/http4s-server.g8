@@ -47,4 +47,9 @@ package object implicits {
         )
       } yield validEntity
   }
+
+  implicit class OptionIdOps[A](private val a: A) {
+    def toOptWhen(cond: => Boolean): Option[A] = if (cond) Some(a) else None
+  }
+
 }
