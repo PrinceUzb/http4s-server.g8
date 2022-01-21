@@ -1,23 +1,21 @@
 package $package$.api
 
-import cats.data.NonEmptyList
 import cats.effect.IO
 import cats.implicits._
-import $package$.domain.{EmailAndPassword, UserData}
-import eu.timepit.refined.types.string.NonEmptyString
-import io.circe.Encoder
-import org.http4s._
+import $package$.domain.{Credentials, UserData}
 import $package$.test.api.UserRoutesChecker
-import $package$.test.utils.{FakeData, TestEnv}
+import $package$.test.utils._
 import $package$.test.utils.logger.NoOp
+import org.http4s._
+import org.scalatest.Assertion
 
-class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
+class UserRoutesSpec extends UserRoutesChecker[IO] {
 
   test("Register User") {
-    def theTest(isCorrect: Boolean, method: Method, body: Option[UserData] = None) = {
+    def theTest(method: Method, body: Option[UserData] = None): IO[Assertion] = {
       val shouldReturn =
         if (method == Method.POST)
-          if (body.nonEmpty && isCorrect) Status.NoContent
+          if (body.nonEmpty) Status.Created
           else Status.BadRequest
         else Status.Unauthorized
 
@@ -25,11 +23,10 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
         s"""
         Params:
           Method: \$method
-          IsCorrectCredentials: \$isCorrect
           Body: \$body
           Should Return: \$shouldReturn
       """
-      reqToUserRegister(method, body, isCorrect)
+      reqToUserRegister(method, body)
         .map(res => assert(res.status == shouldReturn, params))
         .handleError { error =>
           fail(s"Test failed. Error: \$error")
@@ -37,17 +34,15 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
     }
 
     runAssertions(
-      theTest(false, Method.POST),
-      theTest(false, Method.GET),
-      theTest(false, Method.POST, FakeData.userData.some),
-      theTest(true, Method.POST),
-      theTest(true, Method.GET),
-      theTest(true, Method.POST, FakeData.userData.some),
+      theTest(Method.POST),
+      theTest(Method.GET),
+      theTest(Method.POST, FakeData.userData.some),
+      theTest(Method.POST, FakeData.userData.some)
     )
   }
 
   test("Authorization") {
-    def theTest(isCorrect: Boolean, method: Method, body: Option[EmailAndPassword] = None) = {
+    def theTest(isCorrect: Boolean, method: Method, body: Option[Credentials] = None): IO[Assertion] = {
       val shouldReturn =
         if (method == Method.POST)
           if (body.nonEmpty)
@@ -70,20 +65,18 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
         }
     }
 
-    val body = EmailAndPassword(FakeData.randomEmail, FakeData.Pass).some
-
     runAssertions(
-      theTest(false, Method.POST),
-      theTest(false, Method.GET),
-      theTest(false, Method.POST, body),
-      theTest(true, Method.POST),
-      theTest(true, Method.GET),
-      theTest(true, Method.POST, body)
+      theTest(isCorrect = false, Method.POST),
+      theTest(isCorrect = false, Method.GET),
+      theTest(isCorrect = false, Method.POST, FakeData.credentials(true).some),
+      theTest(isCorrect = true, Method.POST),
+      theTest(isCorrect = true, Method.GET),
+      theTest(isCorrect = true, Method.POST, FakeData.credentials(true).some)
     )
   }
 
   test("GET User") {
-    def theTest(isAuthed: Boolean, method: Method) = {
+    def theTest(isAuthed: Boolean, method: Method): IO[Assertion] = {
       val shouldReturn =
         if (isAuthed)
           if (method == Method.GET) Status.Ok
@@ -105,10 +98,40 @@ class UserRoutesSpec extends TestEnv with UserRoutesChecker[IO] {
     }
 
     runAssertions(
-      theTest(false, Method.POST),
-      theTest(false, Method.GET),
-      theTest(true, Method.POST),
-      theTest(true, Method.GET),
+      theTest(isAuthed = false, Method.POST),
+      theTest(isAuthed = false, Method.GET),
+      theTest(isAuthed = true, Method.POST),
+      theTest(isAuthed = true, Method.GET)
+    )
+  }
+
+  test("Logout") {
+    def theTest(isAuthed: Boolean, method: Method): IO[Assertion] = {
+      val shouldReturn =
+        if (isAuthed)
+          if (method == Method.GET) Status.SeeOther
+          else Status.NotFound
+        else Status.Unauthorized
+
+      val params =
+        s"""
+          Params:
+            Method: \$method
+            IsAuthorized: \$isAuthed
+            Should Return: \$shouldReturn
+        """
+      reqToLogout(method, isAuthed)
+        .map(res => assert(res.status == shouldReturn, params))
+        .handleError { error =>
+          fail(s"Test failed. Error: \$error")
+        }
+    }
+
+    runAssertions(
+      theTest(isAuthed = false, Method.POST),
+      theTest(isAuthed = false, Method.GET),
+      theTest(isAuthed = true, Method.POST),
+      theTest(isAuthed = true, Method.GET)
     )
   }
 }

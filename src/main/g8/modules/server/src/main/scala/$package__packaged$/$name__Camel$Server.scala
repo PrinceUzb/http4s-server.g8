@@ -5,6 +5,7 @@ import cats.effect.std.Console
 import cats.implicits._
 import $package$.config.{ConfigLoader, HttpServerConfig}
 import $package$.modules._
+import $package$.services.redis.RedisClient
 import eu.timepit.refined.auto.autoUnwrap
 import org.http4s._
 import org.http4s.blaze.server.BlazeServerBuilder
@@ -18,9 +19,10 @@ object $name;format="Camel"$Server {
     for {
       conf     <- ConfigLoader.app[F]
       db       <- LiveDatabase[F](conf.dbConfig)
-      programs <- $name;format="Camel"$Program[F](db)
-      httpAPI <- HttpApi[F](programs, conf.logConfig)
-      _     <- server[F](conf.serverConfig, httpAPI.httpApp)
+      redis    <- RedisClient[F](conf.redisConfig)
+      programs <- $name;format="Camel"$Program[F](db, redis)
+      httpAPI  <- HttpApi[F](programs, conf.logConfig)
+      _        <- server[F](conf.serverConfig, httpAPI.httpApp)
     } yield ExitCode.Success
 
   private[this] def server[F[_]: Async](

@@ -3,5 +3,6 @@ package $package$.config
 case class AppConfig(
   dbConfig: DBConfig,
   logConfig: LogConfig,
-  serverConfig: HttpServerConfig
+  serverConfig: HttpServerConfig,
+  redisConfig: RedisConfig
 )

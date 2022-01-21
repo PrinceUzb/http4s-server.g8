@@ -3,6 +3,7 @@ package $package$.test.utils
 import cats.effect.IO
 import cats.implicits._
 import $package$.test.utils.IOAssertion
+import org.scalatest.Checkpoints.Checkpoint
 import org.scalatest.{Assertion, BeforeAndAfterAll}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks

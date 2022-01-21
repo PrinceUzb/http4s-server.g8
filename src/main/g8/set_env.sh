@@ -10,3 +10,4 @@ export HTTP_HEADER_LOG=false
 export HTTP_BODY_LOG=false
 export HTTP_HOST="localhost"
 export HTTP_PORT=9000
+export REDIS_SERVER_URI="redis://localhost"

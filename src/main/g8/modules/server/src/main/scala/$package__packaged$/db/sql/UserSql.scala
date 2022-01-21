@@ -1,16 +1,18 @@
 package $package$.db.sql
 
-import $package$.domain.User
 import $package$.domain.custom.refinements._
+import $package$.domain.{User, UserData}
+import $package$.implicits.PasswordOps
 import skunk._
 import skunk.codec.all._
 import skunk.implicits._
-import tsec.passwordhashers._
-import tsec.passwordhashers.jca.SCrypt
+
+import java.time.LocalDateTime
+import java.util.UUID
 
 object UserSql {
   val dec: Decoder[User] = (uuid ~ varchar ~ varchar ~ timestamp ~ varchar).map {
-    case id ~ fullName ~ email ~ createdAt ~ p =>
+    case id ~ fullName ~ email ~ createdAt ~ _ =>
       User(
         id = id,
         fullName = FullName.unsafeFrom(fullName),
@@ -19,13 +21,12 @@ object UserSql {
       )
   }
 
-  val enc: Encoder[User ~ PasswordHash[SCrypt]] = (uuid ~ varchar ~ varchar ~ timestamp ~ varchar).contramap {
-    case (u, pass) =>
-      u.id ~ u.fullName.value ~ u.email.value ~ u.createdAt ~ pass
+  val enc: Encoder[UUID ~ UserData] = (uuid ~ varchar ~ varchar ~ timestamp ~ varchar).contramap { case id ~ u =>
+    id ~ u.fullName.value ~ u.email.value ~ LocalDateTime.now() ~ u.password.toHashUnsafe
   }
 
-  val insert: Command[User ~ PasswordHash[SCrypt]] =
-    sql"""INSERT INTO users VALUES (\$enc)""".command
+  val insert: Query[UUID ~ UserData, User] =
+    sql"""INSERT INTO users VALUES (\$enc) RETURNING *""".query(dec)
 
   val selectByEmail: Query[String, User] =
     sql"""SELECT * FROM users WHERE email = \$varchar """.query(dec)

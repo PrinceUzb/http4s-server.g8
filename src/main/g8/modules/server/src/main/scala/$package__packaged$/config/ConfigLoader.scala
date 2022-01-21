@@ -4,6 +4,7 @@ import cats.effect.Async
 import cats.implicits._
 import ciris._
 import ciris.refined.refTypeConfigDecoder
+import $package$.domain.custom.refinements.UriAddress
 import eu.timepit.refined.types.net.UserPortNumber
 import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
@@ -28,9 +29,15 @@ object ConfigLoader {
     env("HTTP_PORT").as[UserPortNumber]
   ).parMapN(HttpServerConfig.apply)
 
+
+  private[this] def redisConfig: ConfigValue[Effect, RedisConfig] = (
+    env("REDIS_SERVER_URI").as[UriAddress]
+    ).map(RedisConfig.apply)
+
   def app[F[_]: Async]: F[AppConfig] = (
     databaseConfig,
     httpLogConfig,
-    httpServerConfig
+    httpServerConfig,
+    redisConfig
   ).parMapN(AppConfig.apply).load[F]
 }

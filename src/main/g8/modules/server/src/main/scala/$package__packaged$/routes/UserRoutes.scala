@@ -4,6 +4,7 @@ import cats.effect._
 import cats.implicits._
 import $package$.domain._
 import $package$.security.AuthService
+import $package$.services.UserService
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
@@ -12,10 +13,15 @@ import tsec.authentication._
 import tsec.authentication.credentials.CredentialsError
 
 object UserRoutes {
-  def apply[F[_]: Async: Logger](implicit authService: AuthService[F, User]): UserRoutes[F] = new UserRoutes
+  def apply[F[_]: Async: Logger](userService: UserService[F])(implicit
+    authService: AuthService[F, User]
+  ): UserRoutes[F] = new UserRoutes(userService)
 }
 
-final class UserRoutes[F[_]: Async](implicit logger: Logger[F], authService: AuthService[F, User]) {
+final class UserRoutes[F[_]: Async](userService: UserService[F])(implicit
+  logger: Logger[F],
+  authService: AuthService[F, User]
+) {
 
   implicit object dsl extends Http4sDsl[F]
   import dsl._
@@ -38,7 +44,9 @@ final class UserRoutes[F[_]: Async](implicit logger: Logger[F], authService: Aut
       (for {
         userData <- req.as[UserData]
         _        <- logger.debug(s"\$userData")
-      } yield Response[F](NoContent))
+        user     <- userService.create(userData)
+        response <- Created(user)
+      } yield response)
         .handleErrorWith { err =>
           logger.error(err)("Error occurred while register User. ") >>
             BadRequest("Something went wrong. Please try again!")

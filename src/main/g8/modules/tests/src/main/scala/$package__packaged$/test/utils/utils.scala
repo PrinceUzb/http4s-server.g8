@@ -1,17 +1,21 @@
 package $package$.test
 
 import cats.Eq
-import $package$.test.utils.{CatsEquivalence, LowPriorityCatsConstraints}
-import org.scalactic._
+import cats.effect.Async
+import $package$.services.redis.RedisClient
+import $package$.test.service.RedisClientMock
 import org.scalactic.TripleEqualsSupport.{AToBEquivalenceConstraint, BToAEquivalenceConstraint}
+import org.scalactic._
+import org.typelevel.log4cats.Logger
 
 import scala.language.implicitConversions
 
 package object utils {
-  // Credits to the original implementation: https://github.com/bvenners/equality-integration-demo
   final class CatsEquivalence[A](ev: Eq[A]) extends Equivalence[A] {
     def areEquivalent(a: A, b: A): Boolean = ev.eqv(a, b)
   }
+
+  implicit def redisClient[F[_]: Async: Logger]: RedisClient[F] = RedisClientMock[F]
 
   trait LowPriorityCatsConstraints extends TripleEquals {
     implicit def lowPriorityCatsConstraint[A, B](implicit ev1: Eq[B], ev2: A => B): CanEqual[A, B] =

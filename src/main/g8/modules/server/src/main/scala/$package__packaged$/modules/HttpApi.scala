@@ -30,7 +30,7 @@ final class HttpApi[F[_]: Async: Logger] private (
   implicit val authUser: AuthService[F, User] = program.auth.user
 
   private[this] val rootRoutes: HttpRoutes[F] = RootRoutes[F]
-  private[this] val userRoutes: HttpRoutes[F] = UserRoutes[F].routes
+  private[this] val userRoutes: HttpRoutes[F] = UserRoutes[F](program.userService).routes
   private[this] val webjars: HttpRoutes[F]    = webjarServiceBuilder[F].toRoutes
 
   private[this] val routes: HttpRoutes[F] = rootRoutes <+> userRoutes

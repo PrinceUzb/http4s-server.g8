@@ -22,6 +22,7 @@ object Dependencies {
     val scalaJsReact  = "$scalajs_react_version$"
     val scalaCss      = "$scala_css_version$"
     val reactJs       = "17.0.2"
+    val redis4cats    = "$redis4cats_version$"
   }
 
   object Libraries {
@@ -54,6 +55,8 @@ object Dependencies {
     val http4sCirce  = http4s("http4s-circe")
     val refinedType  = refined("refined")
     val refinedCats  = refined("refined-cats")
+
+    val redis4catsEffects = "dev.profunktor" %% "redis4cats-effects" % Versions.redis4cats
 
     val tsecHttp4s = "io.github.jmcardon" %% "tsec-http4s" % Versions.tsec
     val cats       = "org.typelevel"      %% "cats-core"   % Versions.cats
@@ -91,7 +94,8 @@ object Dependencies {
     skunkRefined,
     fs2,
     refinedType,
-    tsecHttp4s
+    tsecHttp4s,
+    redis4catsEffects
   )
 
   val testLibraries = Seq(

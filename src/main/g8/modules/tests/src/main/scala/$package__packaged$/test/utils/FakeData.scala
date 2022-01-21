@@ -15,6 +15,12 @@ object FakeData {
 
   val Pass: Password = Password.unsafeFrom("Secret1!")
 
+  def credentials(isCorrect: Boolean): Credentials =
+    if (isCorrect)
+      Credentials(EmailAddress.unsafeFrom("test@test.test") , Password.unsafeFrom("Secret1!"))
+    else
+      Credentials(EmailAddress.unsafeFrom(FakeData.randomEmail) , Password.unsafeFrom("Secret1!"))
+
   def user(email: EmailAddress = randomEmail): User =
     User(
       id = UUID.randomUUID(),
@@ -24,7 +30,7 @@ object FakeData {
     )
 
   def userData: UserData =
-    UserForm(
+    UserData(
       fullName = FullName.unsafeFrom("John Dao"),
       email = randomEmail,
       password = Password.unsafeFrom("Secret1!")
