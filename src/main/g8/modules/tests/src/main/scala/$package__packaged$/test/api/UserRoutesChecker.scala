@@ -5,7 +5,7 @@ import cats.effect._
 import cats.implicits._
 import $package$.domain._
 import $package$.domain.custom.refinements.EmailAddress
-import $package$.implicits.OptionIdOps
+import $package$.implicits.GenericTypeOps
 import $package$.routes._
 import $package$.security.{AuthService, LiveAuthService}
 import $package$.services.redis.RedisClient

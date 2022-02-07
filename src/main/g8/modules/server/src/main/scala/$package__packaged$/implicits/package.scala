@@ -7,6 +7,9 @@ import $package$.domain.custom.refinements.Password
 import $package$.domain.custom.utils.MapConvert
 import $package$.domain.custom.utils.MapConvert.ValidationResult
 import eu.timepit.refined.auto.autoUnwrap
+import io.circe.parser.decode
+import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder, Printer}
 import org.http4s.MediaType
 import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.Part
@@ -48,8 +51,16 @@ package object implicits {
       } yield validEntity
   }
 
-  implicit class OptionIdOps[A](a: A) {
-    def toOptWhen(cond: => Boolean): Option[A] = if (cond) Some(a) else None
+  implicit class CirceDecoderOps(s: String) {
+    def as[A: Decoder]: A = decode[A](s).fold(throw _, json => json)
+  }
+
+  implicit class GenericTypeOps[A](obj: A) {
+    private val printer: Printer = Printer.noSpaces.copy(dropNullValues = true)
+
+    def toOptWhen(cond: => Boolean): Option[A] = if (cond) Some(obj) else None
+
+    def toJson(implicit encoder: Encoder[A]): String = obj.asJson.printWith(printer)
   }
 
 }

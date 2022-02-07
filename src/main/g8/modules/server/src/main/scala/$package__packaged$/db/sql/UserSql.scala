@@ -11,27 +11,25 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 object UserSql {
-  val dec: Decoder[User] = (uuid ~ varchar ~ varchar ~ timestamp ~ varchar).map {
-    case id ~ fullName ~ email ~ createdAt ~ _ =>
-      User(
-        id = id,
-        fullName = FullName.unsafeFrom(fullName),
-        createdAt = createdAt,
-        email = EmailAddress.unsafeFrom(email)
-      )
+  val emailCodec: Codec[EmailAddress] = varchar.imap(email => EmailAddress.unsafeFrom(email))(email => email.value)
+  val fullnameCodec: Codec[FullName] = varchar.imap(fullname => FullName.unsafeFrom(fullname))(fullname => fullname.value)
+
+  val dec: Decoder[User] = (uuid ~ emailCodec ~ fullnameCodec ~ timestamp ~ varchar).map {
+    case id ~ email ~ fullName ~ createdAt ~ _ =>
+      User(id, fullName, email, createdAt)
   }
 
-  val enc: Encoder[UUID ~ UserData] = (uuid ~ varchar ~ varchar ~ timestamp ~ varchar).contramap { case id ~ u =>
-    id ~ u.fullName.value ~ u.email.value ~ LocalDateTime.now() ~ u.password.toHashUnsafe
+  val enc: Encoder[UUID ~ UserData] = (uuid ~ emailCodec ~ fullnameCodec ~ timestamp ~ varchar).contramap { case id ~ u =>
+    id ~ u.email ~ u.fullName ~ LocalDateTime.now() ~ u.password.toHashUnsafe
   }
 
   val insert: Query[UUID ~ UserData, User] =
     sql"""INSERT INTO users VALUES (\$enc) RETURNING *""".query(dec)
 
-  val selectByEmail: Query[String, User] =
-    sql"""SELECT * FROM users WHERE email = \$varchar """.query(dec)
+  val selectByEmail: Query[EmailAddress, User] =
+    sql"""SELECT * FROM users WHERE email = \$emailCodec """.query(dec)
 
-  val selectPass: Query[String, String] =
-    sql"""SELECT password_hash FROM users WHERE email = \$varchar """.query(varchar)
+  val selectPass: Query[EmailAddress, String] =
+    sql"""SELECT password_hash FROM users WHERE email = \$emailCodec """.query(varchar)
 
 }

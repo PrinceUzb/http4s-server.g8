@@ -1,10 +1,9 @@
 package $package$.modules
 
 import cats.effect._
-import cats.effect.kernel.Async
 import cats.effect.std.Console
 import $package$.config.DBConfig
-import $package$.db.algebras.{LiveUserAlgebra, UserAlgebra}
+import $package$.db.algebras.UserAlgebra
 import eu.timepit.refined.auto.autoUnwrap
 import natchez.Trace.Implicits.noop
 import skunk._
@@ -14,27 +13,26 @@ trait Database[F[_]] {
   val user: F[UserAlgebra[F]]
 }
 
-object LiveDatabase {
+object Database {
   def apply[F[_]: Sync: Async: Console](config: DBConfig): F[Database[F]] =
-    Sync[F].delay(
-      new LiveDatabase[F](config)
-    )
-}
+    Session
+      .pooled[F](
+        host = config.host,
+        port = config.port,
+        database = config.database,
+        user = config.user,
+        password = Some(config.password),
+        max = config.poolSize,
+        strategy = Typer.Strategy.SearchPath
+      )
+      .use { implicit session =>
+        Sync[F].delay(new LiveDatabase[F])
+      }
 
-final class LiveDatabase[F[_]: Async: Console] private (
-  config: DBConfig
-) extends Database[F] {
+  final class LiveDatabase[F[_]: Async: Console](implicit
+   session: Resource[F, Session[F]]
+  ) extends Database[F] {
 
-  private[this] val session: SessionPool[F] =
-    Session.pooled[F](
-      host = config.host,
-      port = config.port,
-      database = config.database,
-      user = config.user,
-      password = Some(config.password),
-      max = config.poolSize,
-      strategy = Typer.Strategy.SearchPath
-    )
-
-  override val user: F[UserAlgebra[F]] = session.use(LiveUserAlgebra[F])
+    override val user: F[UserAlgebra[F]] = UserAlgebra[F]
+  }
 }

@@ -4,7 +4,7 @@ import cats.data.OptionT
 import cats.effect.{Async, Sync}
 import cats.implicits.toFunctorOps
 import $package$.config.RedisConfig
-import $package$.utils.JsonUtils.{fromJson, toJsonString}
+import $package$.implicits.{CirceDecoderOps, GenericTypeOps}
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.Stdout._
 import dev.profunktor.redis4cats.effects.{SetArg, SetArgs}
@@ -27,7 +27,7 @@ class RedisClient[F[_]: Async](redisConfig: RedisConfig) {
     override def put(elem: V): F[V] =
       RedisService.use { redis =>
         redis
-          .setNx(getId(elem).toString, toJsonString(elem))
+          .setNx(getId(elem).toString, elem.toJson)
           .map { result =>
             if (result) elem else throw new IllegalArgumentException
           }
@@ -36,14 +36,14 @@ class RedisClient[F[_]: Async](redisConfig: RedisConfig) {
     override def get(id: I): OptionT[F, V] =
       OptionT {
         RedisService.use { redis =>
-          redis.get(id.toString).map(_.map(fromJson[V]))
+          redis.get(id.toString).map(_.map(_.as[V]))
         }
       }
 
     override def update(v: V): F[V] =
       RedisService.use { redis =>
         redis
-          .set(getId(v).toString, toJsonString(v), SetArgs(SetArg.Existence.Xx))
+          .set(getId(v).toString, v.toJson, SetArgs(SetArg.Existence.Xx))
           .map { result =>
             if (result) v else throw new IllegalArgumentException
           }

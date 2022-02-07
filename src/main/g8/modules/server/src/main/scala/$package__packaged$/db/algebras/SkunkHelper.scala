@@ -12,11 +12,12 @@ abstract class SkunkHelper[F[_]: Sync] {
       session.prepare(query).use(action)
     }
 
-  def prepQueryU[A, B](
-    query: Query[A, B]
-  )(action: PreparedQuery[F, A, B] => F[B])(implicit sessionPool: Resource[F, Session[F]]): F[B] =
+  def prepQueryUnique[A, B](
+    query: Query[A, B],
+    args: A
+  )(implicit sessionPool: Resource[F, Session[F]]): F[B] =
     sessionPool.use { session =>
-      session.prepare(query).use(action)
+      session.prepare(query).use(_.unique(args))
     }
 
   def prepListQuery[A, B](
