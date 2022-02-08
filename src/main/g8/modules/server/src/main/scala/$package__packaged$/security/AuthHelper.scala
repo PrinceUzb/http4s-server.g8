@@ -25,4 +25,6 @@ object AuthHelper {
   type SecHttpRoutes[F[_], U] =
     PartialFunction[SecuredRequest[F, U, AuthEncryptedCookie[AES128GCM, EmailAddress]], F[Response[F]]]
 
+  type OnNotAuthenticated[F[_]] = PartialFunction[Request[F], F[Response[F]]]
+
 }

@@ -13,6 +13,8 @@ import tsec.authentication._
 import tsec.authentication.credentials.CredentialsError
 
 object UserRoutes {
+  val prefixPath = "/user"
+
   def apply[F[_]: Async: Logger](userService: UserService[F])(implicit
     authService: AuthService[F, User]
   ): UserRoutes[F] = new UserRoutes(userService)
@@ -25,8 +27,6 @@ final class UserRoutes[F[_]: Async](userService: UserService[F])(implicit
 
   implicit object dsl extends Http4sDsl[F]
   import dsl._
-
-  private[this] val prefixPath = "/user"
 
   private[this] val loginRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case req @ POST -> Root / "login" =>
@@ -62,9 +62,5 @@ final class UserRoutes[F[_]: Async](userService: UserService[F])(implicit
 
   }
 
-  private[this] val userRoutes = loginRoutes <+> privateRoutes
-
-  val routes: HttpRoutes[F] = Router(
-    prefixPath -> userRoutes
-  )
+  val routes: HttpRoutes[F] = loginRoutes <+> privateRoutes
 }

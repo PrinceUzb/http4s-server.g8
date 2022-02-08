@@ -51,7 +51,7 @@ class UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F], redisClient: R
   def reqToAuth(method: Method, body: Option[Credentials], isCorrect: Boolean): F[Response[F]] =
     for {
       authService <- LiveAuthService[F, User](new FakeIdentityService(isCorrect))
-      response    <- reqUserRoutes(Request[F](method, uri"/user/login").withEntity(body))(authService)
+      response    <- reqUserRoutes(Request[F](method, uri"/login").withEntity(body))(authService)
     } yield response
 
   private def reqToAuth(isCorrect: Boolean): F[(AuthService[F, User], Response[F])] =
@@ -59,14 +59,14 @@ class UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F], redisClient: R
       authService <- LiveAuthService[F, User](new FakeIdentityService(isCorrect))
 
       credentials = Credentials(FakeData.randomEmail, FakeData.Pass)
-      loginReq    = Request[F](Method.POST, uri"/user/login").withEntity(credentials)
+      loginReq    = Request[F](Method.POST, uri"/login").withEntity(credentials)
       authRes <- reqUserRoutes(loginReq)(authService)
     } yield (authService, authRes)
 
   def reqToUserRegister(method: Method, body: Option[UserData]): F[Response[F]] =
     for {
       authService <- LiveAuthService[F, User](new FakeIdentityService(false))
-      request = Request[F](method, uri"/user/register").withEntity(body)
+      request = Request[F](method, uri"/register").withEntity(body)
       authRes <- reqUserRoutes(request)(authService)
     } yield authRes
 
@@ -74,7 +74,7 @@ class UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F], redisClient: R
     for {
       res <- reqToAuth(isAuthed)
       (authService, authRes) = res
-      request = Request[F](method, uri"/user")
+      request = Request[F](method, uri"/")
       optCookie = authRes.cookies.find(_.name == "tsec-auth-cookie")
       requestWithCookie = optCookie.fold(request)(cookie => request.addCookie(cookie.name, cookie.content))
       response <- reqUserRoutes(requestWithCookie)(authService)
@@ -84,7 +84,7 @@ class UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F], redisClient: R
     for {
       res <- reqToAuth(isAuthed)
       (authService, authRes) = res
-      request = Request[F](method, uri"/user/logout")
+      request = Request[F](method, uri"/logout")
       optCookie = authRes.cookies.find(_.name == "tsec-auth-cookie")
       requestWithCookie = optCookie.fold(request)(cookie => request.addCookie(cookie.name, cookie.content))
       response <- reqUserRoutes(requestWithCookie)(authService)

@@ -26,22 +26,23 @@ final class HttpApi[F[_]: Async: Logger] private (
   program: $name;format="Camel"$Program[F],
   logConfig: LogConfig
 ) {
-
+  private[this] val root: String        = "/"
+  private[this] val webjarsPath: String = "/webjars"
   implicit val authUser: AuthService[F, User] = program.auth.user
 
-  private[this] val rootRoutes: HttpRoutes[F] = RootRoutes[F]
+  private[this] val rootRoutes: HttpRoutes[F] = RootRoutes[F].routes
   private[this] val userRoutes: HttpRoutes[F] = UserRoutes[F](program.userService).routes
   private[this] val webjars: HttpRoutes[F]    = webjarServiceBuilder[F].toRoutes
-
-  private[this] val routes: HttpRoutes[F] = rootRoutes <+> userRoutes
 
   private[this] val loggedRoutes: HttpRoutes[F] => HttpRoutes[F] = http =>
     middleware.Logger.httpRoutes(logConfig.httpHeader, logConfig.httpBody)(http)
 
-  val httpApp: HttpApp[F] = loggedRoutes(
-    Router (
-      "/" -> routes,
-      "/webjars" -> webjars
-    )
-  ).orNotFound
+  val httpApp: HttpApp[F] =
+    loggedRoutes(
+      Router(
+        webjarsPath              -> webjars,
+        UserRoutes.prefixPath    -> userRoutes,
+        root                     -> rootRoutes,
+      )
+    ).orNotFound
 }
