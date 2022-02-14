@@ -7,7 +7,7 @@ import $package$.domain._
 import $package$.domain.custom.refinements.EmailAddress
 import $package$.implicits.GenericTypeOps
 import $package$.routes._
-import $package$.security.{AuthService, LiveAuthService}
+import $package$.security.AuthService
 import $package$.services.redis.RedisClient
 import $package$.services.{IdentityService, UserService}
 import $package$.test.utils.{FakeData, TestEnv}
@@ -50,13 +50,13 @@ class UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F], redisClient: R
 
   def reqToAuth(method: Method, body: Option[Credentials], isCorrect: Boolean): F[Response[F]] =
     for {
-      authService <- LiveAuthService[F, User](new FakeIdentityService(isCorrect))
+      authService <- AuthService[F, User](new FakeIdentityService(isCorrect), FakeData.TsecKey)
       response    <- reqUserRoutes(Request[F](method, uri"/login").withEntity(body))(authService)
     } yield response
 
   private def reqToAuth(isCorrect: Boolean): F[(AuthService[F, User], Response[F])] =
     for {
-      authService <- LiveAuthService[F, User](new FakeIdentityService(isCorrect))
+      authService <- AuthService[F, User](new FakeIdentityService(isCorrect), FakeData.TsecKey)
 
       credentials = Credentials(FakeData.randomEmail, FakeData.Pass)
       loginReq    = Request[F](Method.POST, uri"/login").withEntity(credentials)
@@ -65,7 +65,7 @@ class UserRoutesChecker[F[_]: Async: Logger](implicit F: Sync[F], redisClient: R
 
   def reqToUserRegister(method: Method, body: Option[UserData]): F[Response[F]] =
     for {
-      authService <- LiveAuthService[F, User](new FakeIdentityService(false))
+      authService <- AuthService[F, User](new FakeIdentityService(false), FakeData.TsecKey)
       request = Request[F](method, uri"/register").withEntity(body)
       authRes <- reqUserRoutes(request)(authService)
     } yield authRes

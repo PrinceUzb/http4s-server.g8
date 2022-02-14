@@ -1,11 +1,11 @@
 package $package$.services.redis
 
 import cats.data.OptionT
-import cats.effect.{Async, Sync}
+import cats.effect.{Async, Sync, Resource}
 import cats.implicits.toFunctorOps
 import $package$.config.RedisConfig
 import $package$.implicits.{CirceDecoderOps, GenericTypeOps}
-import dev.profunktor.redis4cats.Redis
+import dev.profunktor.redis4cats.{Redis, RedisCommands}
 import dev.profunktor.redis4cats.effect.Log.Stdout._
 import dev.profunktor.redis4cats.effects.{SetArg, SetArgs}
 import eu.timepit.refined.auto.autoUnwrap
@@ -18,7 +18,9 @@ object RedisClient {
 }
 
 class RedisClient[F[_]: Async](redisConfig: RedisConfig) {
-  private val RedisService = Redis[F].utf8(redisConfig.uri)
+  private implicit val RedisService: Resource[F, RedisCommands[F, String, String]] = Redis[F].utf8(redisConfig.uri)
+
+  def secretKeyStore: TsecSecretKeyStore[F] = TsecSecretKeyStore[F]
 
   def dummyBackingStore[I, V: Codec](
     getId: V => I

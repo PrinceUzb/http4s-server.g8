@@ -3,6 +3,7 @@ package $package$.test.utils
 import $package$.domain._
 import $package$.domain.custom.refinements._
 import eu.timepit.refined.auto.autoUnwrap
+import tsec.cipher.symmetric.jca.{AES128GCM, SecretKey}
 
 import java.time.LocalDateTime
 import java.util.UUID
@@ -10,6 +11,8 @@ import scala.util.Random
 
 object FakeData {
   def randomString(length: Int): String = Random.alphanumeric.take(length).mkString
+
+  val TsecKey: SecretKey[AES128GCM] = AES128GCM.unsafeGenerateKey
 
   def randomEmail: EmailAddress = EmailAddress.unsafeFrom(s"\${randomString(8)}@gmail.com")
 
