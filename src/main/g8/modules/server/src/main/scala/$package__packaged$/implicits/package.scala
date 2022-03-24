@@ -3,7 +3,6 @@ package $package$
 import cats.effect.{Async, Sync}
 import cats.implicits._
 import $package$.domain.custom.exception.MultipartDecodeError
-import $package$.domain.custom.refinements.Password
 import $package$.domain.custom.utils.MapConvert
 import $package$.domain.custom.utils.MapConvert.ValidationResult
 import io.circe.parser.decode

@@ -14,12 +14,12 @@ object Dependencies {
     val ciris         = "$ciris_version$"
     val refined       = "$refined_version$"
     val redis4cats    = "$redis4cats_version$"
-    val http4sJwtAuth = "1.0.0"
-    val newtype       = "0.4.4"
-    val derevo        = "0.13.0"
-    val monocle       = "3.1.0"
+    val http4sJwtAuth = "$http4s_jwt_auth$"
+    val newtype       = "$newtype$"
+    val derevo        = "$derevo$"
+    val monocle       = "$monocle$"
 
-    val weaver = "0.7.11"
+    val weaver = "$weaver$"
   }
 
   object Libraries {
