@@ -1,25 +1,13 @@
 <configuration>
-
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>
-                %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
-            </pattern>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="org.http4s.blaze.server" level="WARN"/>
-    <logger name="org.http4s.blaze.channel" level="WARN"/>
-
-    <logger name="org.http4s.client.middleware" level="DEBUG"/>
-    <logger name="org.http4s.server.middleware" level="DEBUG"/>
-    <logger name="tsec.authentication.SecuredRequestHandler" level="DEBUG"/>
-    <logger name="$name$" level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
-    </logger>
-
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="STDOUT" />
     </root>
 
+    <logger name="http4s"/>
 </configuration>

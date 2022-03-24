@@ -3,26 +3,16 @@ package $package$
 import cats.effect.{Async, Sync}
 import cats.implicits._
 import $package$.domain.custom.exception.MultipartDecodeError
-import $package$.domain.custom.refinements.Password
 import $package$.domain.custom.utils.MapConvert
 import $package$.domain.custom.utils.MapConvert.ValidationResult
-import eu.timepit.refined.auto.autoUnwrap
 import io.circe.parser.decode
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Printer}
 import org.http4s.MediaType
 import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.Part
-import tsec.passwordhashers.PasswordHash
-import tsec.passwordhashers.jca.SCrypt
 
 package object implicits {
-
-  implicit class PasswordOps(val password: Password) {
-    def toHash[F[_]: Sync]: F[PasswordHash[SCrypt]] = SCrypt.hashpw[F](password)
-
-    def toHashUnsafe: PasswordHash[SCrypt] = SCrypt.hashpwUnsafe(password)
-  }
 
   implicit class PartOps[F[_]: Async](parts: Vector[Part[F]]) {
     private def filterFileTypes(part: Part[F]): Boolean = part.filename.isDefined

@@ -69,10 +69,5 @@ sbt new PrinceUzb/http4s-server.g8
       <td>Refined</td>
       <td>Refined is a Scala library for refining types with type-level predicates which constrain the set of values described by the refined type. </td>
     </tr>
-    <tr>
-      <th>8</th>
-      <td>TSec</td>
-      <td>TSec Is a type-safe general cryptography library on the JVM.</td>
-    </tr>
   </tbody>
 </table>

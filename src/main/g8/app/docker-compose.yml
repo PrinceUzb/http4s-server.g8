@@ -1,0 +1,31 @@
+services:
+  postgres:
+    restart: always
+    image: postgres:12
+    command: -c max_connections=10
+    ports:
+      - \${POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_USER: \${POSTGRES_USER}
+      POSTGRES_PASSWORD: \${POSTGRES_PASSWORD}
+      POSTGRES_DB: \${POSTGRES_DATABASE}
+    volumes:
+      - ./tables.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    restart: always
+    image: redis:6.2.6
+    ports:
+      - "6379:6379"
+    environment:
+      - DEBUG=false
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
