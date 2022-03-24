@@ -1,4 +1,4 @@
-name: GitHub Actions Build
+name: Scala
 on:
   pull_request: {}
   push:
