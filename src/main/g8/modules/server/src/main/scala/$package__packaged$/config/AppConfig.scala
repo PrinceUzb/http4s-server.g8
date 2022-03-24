@@ -1,8 +1,10 @@
 package $package$.config
 
 case class AppConfig(
+  adminJwtConfig: AdminJwtConfig,
+  jwtConfig: JwtConfig,
   dbConfig: DBConfig,
-  logConfig: LogConfig,
+  redis: RedisConfig,
   serverConfig: HttpServerConfig,
-  redisConfig: RedisConfig
+  logConfig: LogConfig
 )

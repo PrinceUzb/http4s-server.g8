@@ -1,57 +1,42 @@
 import Dependencies._
 
-ThisBuild / organization := "$organization$"
-ThisBuild / scalaVersion := "$scala_version$"
+ThisBuild / organization := "uz"
+ThisBuild / scalaVersion := "2.13.8"
 ThisBuild / version      := "1.0"
+
+lazy val root = (project in file("."))
+  .settings(
+    name := "soccer"
+  )
+  .aggregate(server, tests)
 
 lazy val server = (project in file("modules/server"))
   .settings(
-    name := "$name$",
-    libraryDependencies ++= coreLibraries
-  )$if(use_scalajs_react.truthy)$
-  .settings(
-    scalaJSProjects         := Seq(client),
-    Assets / pipelineStages := Seq(scalaJSPipeline),
-    pipelineStages          := Seq(digest, gzip),
-    Compile / compile       := ((Compile / compile) dependsOn scalaJSPipeline).value)
-  .enablePlugins(WebScalaJSBundlerPlugin)
-  $else$
-  .enablePlugins(SbtWeb)
-  $endif$
-
+    name := "soccer",
+    libraryDependencies ++= coreLibraries,
+    scalacOptions ++= CompilerOptions.cOptions,
+    coverageEnabled := true
+  )
 
 lazy val tests = project
   .in(file("modules/tests"))
   .configs(IntegrationTest)
   .settings(
-    name := "$name$-test-suite",
+    name := "soccer-test-suite",
+    testFrameworks += new TestFramework("weaver.framework.CatsEffect"),
     Defaults.itSettings,
-    libraryDependencies ++= testLibraries ++ testLibraries.map(_ % Test)
+    scalacOptions ++= CompilerOptions.cOptions,
+    libraryDependencies ++= testLibraries
   )
   .dependsOn(server)
 
-$if(use_scalajs_react.truthy)$
-lazy val client = (project in file("modules/client"))
-  .settings(
-    name := "client",
-    scalaJSUseMainModuleInitializer := true,
-    resolvers += Resolver.sonatypeRepo("releases"),
-    libraryDependencies ++= Seq(
-      "io.github.chronoscala"             %%% "chronoscala"   % "2.0.2",
-      "com.github.japgolly.scalajs-react" %%% "core"          % Versions.scalaJsReact,
-      "com.github.japgolly.scalajs-react" %%% "extra"         % Versions.scalaJsReact,
-      "com.github.japgolly.scalacss"      %%% "ext-react"     % Versions.scalaCss,
-      "io.circe"                          %%% "circe-core"    % Versions.circe,
-      "io.circe"                          %%% "circe-parser"  % Versions.circe,
-      "io.circe"                          %%% "circe-generic" % Versions.circe,
-      "io.circe"                          %%% "circe-refined" % Versions.circe,
-      "eu.timepit"                        %%% "refined"       % Versions.refined
-    ),
-    webpackEmitSourceMaps := false,
-    Compile / npmDependencies ++= Seq(
-      "react" -> Versions.reactJs,
-      "react-dom" -> Versions.reactJs
-    )
-  )
-  .enablePlugins(ScalaJSBundlerPlugin)
-$endif$
+val runTests = inputKey[Unit]("Runs tests")
+val runServer = inputKey[Unit]("Runs server")
+
+runServer := {
+  (server / Compile / run).evaluated
+}
+
+runTests := {
+  (tests / Test / test).value
+}
