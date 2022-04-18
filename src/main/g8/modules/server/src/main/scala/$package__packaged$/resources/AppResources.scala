@@ -12,6 +12,7 @@ import org.typelevel.log4cats.Logger
 import skunk._
 import skunk.codec.text._
 import skunk.implicits._
+import skunk.util.Typer
 import $package$.config.{AppConfig, DBConfig, RedisConfig}
 import $package$.services.redis.RedisClient
 
@@ -51,7 +52,8 @@ object AppResources {
         user = c.user,
         password = Some(c.password.value),
         database = c.database,
-        max = c.poolSize
+        max = c.poolSize,
+        strategy = Typer.Strategy.SearchPath
       )
       .evalTap(checkPostgresConnection[F])
 

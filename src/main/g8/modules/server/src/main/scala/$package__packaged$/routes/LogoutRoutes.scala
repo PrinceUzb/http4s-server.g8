@@ -6,7 +6,7 @@ import dev.profunktor.auth.AuthHeaders
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server._
-import $package$.http.auth.users.CommonUser
+import $package$.domain.User
 import $package$.services.Auth
 
 final case class LogoutRoutes[F[_]: Monad](
@@ -15,14 +15,13 @@ final case class LogoutRoutes[F[_]: Monad](
 
   private[routes] val prefixPath = "/auth"
 
-  private[this] val httpRoutes: AuthedRoutes[CommonUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "logout" as user =>
-      AuthHeaders
-        .getBearerToken(ar.req)
-        .traverse_(auth.logout(_, user.value.name)) *> NoContent()
-    }
+  private[this] val httpRoutes: AuthedRoutes[User, F] = AuthedRoutes.of { case ar @ POST -> Root / "logout" as user =>
+    AuthHeaders
+      .getBearerToken(ar.req)
+      .traverse_(auth.logout(_, user.email)) *> NoContent()
+  }
 
-  def routes(authMiddleware: AuthMiddleware[F, CommonUser]): HttpRoutes[F] = Router(
+  def routes(authMiddleware: AuthMiddleware[F, User]): HttpRoutes[F] = Router(
     prefixPath -> authMiddleware(httpRoutes)
   )
 

@@ -11,7 +11,7 @@ trait JwtExpire[F[_]] {
 }
 
 object JwtExpire {
-  def make[F[_]: Sync]: F[JwtExpire[F]] =
+  def apply[F[_]: Sync]: F[JwtExpire[F]] =
     JwtClock[F].utc.map { implicit jClock => (claim: JwtClaim, exp: TokenExpiration) =>
         Sync[F].delay(claim.issuedNow.expiresIn(exp.value.toMillis))
     }

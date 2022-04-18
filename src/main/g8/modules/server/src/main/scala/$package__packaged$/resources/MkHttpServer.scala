@@ -18,7 +18,7 @@ object MkHttpServer {
   def apply[F[_]: MkHttpServer]: MkHttpServer[F] = implicitly
 
   private def showEmberBanner[F[_]: Logger](s: Server): F[Unit] =
-    Logger[F].info(s"\n\${Banner.mkString("\n")}\nHTTP Server started at \${s.address}")
+    Logger[F].info(s"\\n\${Banner.mkString("\n")}\\nHTTP Server started at \${s.address}")
 
   implicit def forAsyncLogger[F[_]: Async: Logger]: MkHttpServer[F] =
     (cfg: HttpServerConfig, httpApp: HttpApp[F]) =>

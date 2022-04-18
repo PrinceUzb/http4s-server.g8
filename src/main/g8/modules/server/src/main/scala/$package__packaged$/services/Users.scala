@@ -1,38 +1,40 @@
 package $package$.services
 
+import cats.data.OptionT
 import cats.effect._
 import cats.syntax.all._
 import skunk._
 import skunk.implicits._
-import $package$.domain.ID
-import $package$.domain.auth._
+import $package$.domain.{ID, User}
+import $package$.domain.User._
+import $package$.domain.custom.exception.EmailInUse
+import $package$.domain.custom.refinements.EmailAddress
+import $package$.domain.types.{EncryptedPassword, UserId}
 import $package$.effects.GenUUID
-import $package$.http.auth.users._
 import $package$.services.sql.UserSQL._
 
 trait Users[F[_]] {
-  def find(username: UserName): F[Option[UserWithPassword]]
-  def create(username: UserName, password: EncryptedPassword): F[UserId]
+  def find(email: EmailAddress): F[Option[UserWithPassword]]
+  def create(userParam: CreateUser, password: EncryptedPassword): F[User]
 }
 
 object Users {
   def apply[F[_]: GenUUID: Sync](
-    session: Resource[F, Session[F]]
+    implicit session: Resource[F, Session[F]]
   ): Users[F] =
     new Users[F] with SkunkHelper[F] {
-      implicit val ev: Resource[F, Session[F]] = session
-      def find(username: UserName): F[Option[UserWithPassword]] =
-        prepOptQuery(selectUser, username).map(_.map { case user ~ p =>
-          UserWithPassword(user.id, user.name, p)
-        })
+      def find(email: EmailAddress): F[Option[UserWithPassword]] =
+        OptionT(prepOptQuery(selectUser, email)).map { case user ~ p =>
+          UserWithPassword(user, p)
+        }.value
 
-      def create(username: UserName, password: EncryptedPassword): F[UserId] =
+      def create(userParam: CreateUser, password: EncryptedPassword): F[User] =
         ID.make[F, UserId]
           .flatMap { id =>
-            prepCmd(insertUser, User(id, username) ~ password).as(id)
+            prepQueryUnique(insertUser, id ~ userParam ~ password).map(_._1)
           }
           .recoverWith { case SqlState.UniqueViolation(_) =>
-            UserNameInUse(username).raiseError[F, UserId]
+            EmailInUse(userParam.email).raiseError[F, User]
           }
     }
 

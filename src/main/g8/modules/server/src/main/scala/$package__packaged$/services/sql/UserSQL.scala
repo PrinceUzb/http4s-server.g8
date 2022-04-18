@@ -2,27 +2,29 @@ package $package$.services.sql
 
 import skunk._
 import skunk.implicits._
-import $package$.domain.auth.{EncryptedPassword, UserName}
-import $package$.http.auth.users.User
+import $package$.domain.User.CreateUser
+import $package$.domain.custom.refinements.EmailAddress
+import $package$.domain.types._
+import $package$.domain.{Role, User}
 
 object UserSQL {
-  val codec: Codec[User ~ EncryptedPassword] =
-    (userId ~ userName ~ encPassword).imap { case i ~ n ~ p =>
-      User(i, n) ~ p
-    } { case u ~ p =>
-      u.id ~ u.name ~ p
+  val userId: Codec[UserId] = identity[UserId]
+
+  private val Columns = userId ~ userName ~ email ~ gender ~ encPassword ~ role
+
+  val encoder: Encoder[UserId ~ CreateUser ~ EncryptedPassword] =
+    Columns.contramap { case i ~ u ~ p =>
+      i ~ u.name ~ u.email ~ u.gender ~ p ~ Role.USER
+    }
+  val decoder: Decoder[User ~ EncryptedPassword] =
+    Columns.map { case i ~ n ~ e ~ g ~ p ~ r =>
+      User(i, n, e, g, r) ~ p
     }
 
-  val selectUser: Query[UserName, User ~ EncryptedPassword] =
-    sql"""
-        SELECT * FROM users
-        WHERE name = \$userName
-       """.query(codec)
+  val selectUser: Query[EmailAddress, User ~ EncryptedPassword] =
+    sql"""SELECT * FROM users WHERE email = \$email""".query(decoder)
 
-  val insertUser: Command[User ~ EncryptedPassword] =
-    sql"""
-        INSERT INTO users
-        VALUES (\$codec)
-        """.command
+  val insertUser: Query[UserId ~ CreateUser ~ EncryptedPassword, User ~ EncryptedPassword] =
+    sql"""INSERT INTO users VALUES (\$encoder) returning *""".query(decoder)
 
 }

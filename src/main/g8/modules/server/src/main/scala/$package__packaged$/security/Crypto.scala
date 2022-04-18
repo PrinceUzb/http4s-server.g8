@@ -2,7 +2,8 @@ package $package$.security
 
 import cats.effect.Sync
 import cats.syntax.all._
-import $package$.domain.auth.{DecryptCipher, EncryptCipher, EncryptedPassword, Password}
+import $package$.domain.custom.refinements.Password
+import $package$.domain.types.{DecryptCipher, EncryptCipher, EncryptedPassword}
 import $package$.types.PasswordSalt
 
 import java.security.SecureRandom
@@ -16,7 +17,7 @@ trait Crypto {
 }
 
 object Crypto {
-  def make[F[_]: Sync](passwordSalt: PasswordSalt): F[Crypto] =
+  def apply[F[_]: Sync](passwordSalt: PasswordSalt): F[Crypto] =
     Sync[F]
       .delay {
         val random  = new SecureRandom()
@@ -47,7 +48,7 @@ object Crypto {
             val base64 = Base64.getDecoder
             val bytes  = base64.decode(password.value.getBytes("UTF-8"))
             val result = new String(dc.value.doFinal(bytes), "UTF-8")
-            Password(result)
+            Password.unsafeFrom(result)
           }
         }
       }

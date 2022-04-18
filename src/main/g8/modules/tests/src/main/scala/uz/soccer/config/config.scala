@@ -1,5 +1,4 @@
 package $package$
-
 import ciris.Secret
 import eu.timepit.refined.types.string.NonEmptyString
 import $package$.types.{JwtAccessTokenKeyConfig, PasswordSalt, TokenExpiration}

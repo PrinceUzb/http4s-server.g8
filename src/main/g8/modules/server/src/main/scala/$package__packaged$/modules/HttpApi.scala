@@ -9,9 +9,8 @@ import org.http4s.server.Router
 import org.http4s.server.middleware._
 import org.typelevel.log4cats.Logger
 import $package$.config.LogConfig
-import $package$.http.auth.users.CommonUser
+import $package$.domain.User
 import $package$.http.routes.{LoginRoutes, LogoutRoutes, UserRoutes}
-import $package$.security.Security
 
 import scala.concurrent.duration.DurationInt
 
@@ -27,14 +26,14 @@ final class HttpApi[F[_]: Async: Logger] private (
   security: Security[F],
   logConfig: LogConfig
 ) {
-  private[this] val baseURL: String   = "/"
+  private[this] val baseURL: String = "/"
 
   private[this] val usersMiddleware =
-    JwtAuthMiddleware[F, CommonUser](security.userJwtAuth.value, security.usersAuth.findUser)
+    JwtAuthMiddleware[F, User](security.userJwtAuth.value, security.usersAuth.findUser)
 
   // Auth routes
   private[this] val loginRoutes  = LoginRoutes[F](security.auth).routes
-  private[this] val userRoutes = UserRoutes[F](security.auth).routes
+  private[this] val userRoutes   = UserRoutes[F](security.auth).routes
   private[this] val logoutRoutes = LogoutRoutes[F](security.auth).routes(usersMiddleware)
 
   // Open routes
@@ -42,7 +41,7 @@ final class HttpApi[F[_]: Async: Logger] private (
     userRoutes <+> loginRoutes <+> logoutRoutes
 
   private[this] val routes: HttpRoutes[F] = Router(
-    baseURL   -> openRoutes
+    baseURL -> openRoutes
   )
 
   private[this] val middleware: HttpRoutes[F] => HttpRoutes[F] = {

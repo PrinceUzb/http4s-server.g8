@@ -13,8 +13,6 @@ import weaver.{Expectations, SimpleIOSuite}
 
 trait HttpSuite extends SimpleIOSuite with Checkers {
 
-  val RedisMock: RedisClient[IO] = RedisClientMock[IO]
-
   def expectHttpBodyAndStatus[A: Encoder](routes: HttpRoutes[IO], req: Request[IO])(
     expectedBody: A,
     expectedStatus: Status

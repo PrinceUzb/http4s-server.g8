@@ -36,11 +36,6 @@ object ConfigLoader {
   def redisConfig: ConfigValue[Effect, RedisConfig] =
     env("REDIS_SERVER_URI").as[UriAddress].map(RedisConfig.apply)
 
-  def adminJwtConfig: ConfigValue[Effect, AdminJwtConfig] = (
-    env("JWT_SECRET_KEY").as[JwtSecretKeyConfig].secret,
-    env("ADMIN_USER_TOKEN").as[AdminUserTokenConfig].secret
-  ).parMapN(AdminJwtConfig.apply)
-
   def jwtConfig: ConfigValue[Effect, JwtConfig] = (
     env("ACCESS_TOKEN_SECRET_KEY").as[JwtAccessTokenKeyConfig].secret,
     env("PASSWORD_SALT").as[PasswordSalt].secret,
@@ -48,7 +43,6 @@ object ConfigLoader {
   ).parMapN(JwtConfig.apply)
 
   def load[F[_]: Async]: F[AppConfig] = (
-    adminJwtConfig,
     jwtConfig,
     databaseConfig,
     redisConfig,

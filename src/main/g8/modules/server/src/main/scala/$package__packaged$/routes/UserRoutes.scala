@@ -7,9 +7,11 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.JsonDecoder
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
-import $package$.domain.auth.{CreateUser, UserNameInUse}
 import $package$.domain.tokenEncoder
 import $package$.services.Auth
+import io.circe.refined._
+import $package$.domain.User.CreateUser
+import $package$.domain.custom.exception.EmailInUse
 
 final case class UserRoutes[F[_]: JsonDecoder: MonadThrow](
   auth: Auth[F]
@@ -20,10 +22,10 @@ final case class UserRoutes[F[_]: JsonDecoder: MonadThrow](
   private[this] val httpRoutes: HttpRoutes[F] = HttpRoutes.of[F] { case req @ POST -> Root / "user" =>
     req.decodeR[CreateUser] { user =>
       auth
-        .newUser(user.username.toDomain, user.password.toDomain)
+        .newUser(user)
         .flatMap(Created(_))
-        .recoverWith { case UserNameInUse(u) =>
-          Conflict(u.show)
+        .recoverWith { case EmailInUse(u) =>
+          Conflict(u)
         }
     }
 

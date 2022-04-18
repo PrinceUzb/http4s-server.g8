@@ -1,14 +1,12 @@
 package $package$
-
 import cats.effect.std.Supervisor
 import cats.effect.{IO, IOApp}
 import dev.profunktor.redis4cats.log4cats._
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import org.typelevel.log4cats.{Logger, SelfAwareStructuredLogger}
 import $package$.config.ConfigLoader
-import $package$.modules.HttpApi
+import $package$.modules.{HttpApi, Security}
 import $package$.resources.{AppResources, MkHttpServer}
-import $package$.security.Security
 
 object Application extends IOApp.Simple {
 
@@ -20,7 +18,7 @@ object Application extends IOApp.Simple {
         Supervisor[IO].use { implicit sp =>
           AppResources[IO](cfg)
             .evalMap { res =>
-              Security[IO](cfg, res.postgres, res.redis).map { security =>
+              Security[IO](cfg, res).map { security =>
                 cfg.serverConfig -> HttpApi[IO](security, cfg.logConfig).httpApp
               }
             }
